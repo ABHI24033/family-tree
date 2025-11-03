@@ -27,9 +27,21 @@ async function buildTree(personId, depth = 0, maxDepth = 20) {
     gender: person.gender,
     birthYear: person.birthYear,
     photoUrl: person.photoUrl,
-    father: person.father ? { _id: person.father._id, name: person.father.name } : null,
-    mother: person.mother ? { _id: person.mother._id, name: person.mother.name } : null,
-    spouse: person.spouse ? { _id: person.spouse._id, name: person.spouse.name } : null,
+    father: person.father ? {
+      _id: person.father._id,
+      name: person.father.name,
+      birthYear: person.father.birthYear,
+    } : null,
+    mother: person.mother ? {
+      _id: person.mother._id,
+      name: person.mother.name,
+      birthYear: person?.mother?.birthYear,
+    } : null,
+    spouse: person.spouse ? { 
+      _id: person.spouse._id, 
+      name: person.spouse.name, 
+      birthYear: person?.spouse?.birthYear, 
+    } : null,
     children
   };
 }

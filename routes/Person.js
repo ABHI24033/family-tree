@@ -3,7 +3,8 @@ import {
   createPerson,
   deletePerson,
   listPersons,
-  addChild
+  addChild,
+  addSpouse
 } from "../controllers/Person.js";
 import { getFamilyTree } from "../controllers/FamilyTree.js";
 
@@ -17,5 +18,6 @@ router.delete("/:id", deletePerson);
 // family tree endpoint: nested structure
 router.get("/tree/:id", getFamilyTree);
 router.post("/child/:parentId", addChild);
+router.post("/spouse/:id", addSpouse);
 
 export default router;

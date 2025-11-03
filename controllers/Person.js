@@ -98,7 +98,7 @@ export const listPersons = async (req, res, next) => {
 export const addChild = async (req, res, next) => {
   try {
     const { parentId } = req.params;  // parentId from URL
-    const { name, gender, dateOfBirth, father, mother, spouse } = req.body; // child details
+    const { name, gender, birthYear, father, mother, spouse } = req.body; // child details
 
     // Validate parent
     const parent = await Person.findById(parentId);
@@ -108,7 +108,7 @@ export const addChild = async (req, res, next) => {
     const childData = {
       name,
       gender,
-      dateOfBirth,
+      birthYear,
       spouse: spouse || null,
       father: father || (parent.gender === "Male" ? parent._id : null),
       mother: mother || (parent.gender === "Female" ? parent._id : null),
@@ -142,3 +142,50 @@ export const addChild = async (req, res, next) => {
   }
 };
 
+
+export const addSpouse = async (req, res, next) => {
+  try {
+    const { id } = req.params; 
+    const { name, gender, birthYear } = req.body; 
+
+    // --- 1. Validate Primary Person ---
+    const person = await Person.findById(id);
+    
+    if (!person) {
+      return res.status(404).json({ message: "Primary person not found" });
+    }
+
+    // --- 2. Check for existing spouse ---
+    if (person.spouse) {
+      return res.status(400).json({ message: "This person is already linked to a spouse." });
+    }
+
+    // --- 3. Create New Spouse Record ---
+    const spouseData = {
+      name,
+      gender,
+      birthYear,
+      spouse: person._id, 
+    };
+
+    const newSpouse = await Person.create(spouseData);
+
+    const updatedPerson = await Person.findByIdAndUpdate(
+      id,
+      {
+        spouse: newSpouse._id,
+        $addToSet: { children: { $each: person.children } } // Link existing children to the new spouse
+      },
+      { new: true }
+    ).populate("children father mother spouse", "name gender dateOfBirth");
+
+    // --- 5. Final Confirmation & Response ---
+    res.status(201).json({
+      message: "Spouse added and links established successfully",
+      person: updatedPerson,
+      spouse: newSpouse,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
